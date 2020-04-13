@@ -84,7 +84,6 @@ let fs =
 "  float h11 = hash(i + vec2(1.0, 1.0));" +
 "  return -1.0 + 2.0 * mix(mix(h00, h10, u.x), mix(h01, h11, u.x), u.y);" +
 "}" +
-// グラディエントノイズ
 // 拡散の所はおいおい理解します（海の色の計算）
 // nは海面の法線ベクトル、lは入射光の逆ベクトル、pは・・80.0？？
 // nとlの方向が近いほど大きい（maxで1.0）
@@ -116,7 +115,7 @@ let fs =
 "float sea_octave(vec2 uv, float choppy){" +
 // まずバリューノイズによる横方向の変動を加える
 "  uv += vnoise2(uv);" +
-// 0.0と±1.0で挙動が異なる二つの波を片方の割合でmixする
+// 挙動が異なる二つの波を片方の割合でmixする
 "  vec2 wv = 1.0 - abs(sin(uv));" +
 "  vec2 swv = abs(cos(uv));" +
 "  wv = mix(wv, swv, wv);" +
@@ -131,7 +130,7 @@ let fs =
 "  float choppy = SEA_CHOPPY;" +  // 波の形らしいんだけどね。
 "  float seatime = u_time * SEA_SPEED;" +  // あっちでSEA_TIMEとなってるやつ。
 "  vec2 uv = p.xz;" + // xz平面への射影ですね
-"  uv.x *= 0.75;" + // なんで水平方向で縮めているのかは知らない。実験してみるか。
+"  uv.x *= 0.75;" + // なんで水平方向で縮めているのかは知らない・・
 // dは各段階での基本波、hは最終的な海面の水平からの高さ。
 // returnでp.y - hを取ることで海面からの高さが出る計算ですね。
 "  float d, h = 0.0;" +
@@ -141,7 +140,7 @@ let fs =
 "    uv = octave_m * uv;" +
 "    freq *= 1.9;" +  // 振動数を大きく
 "    amp *= 0.22;" +  // 振幅を小さく
-"    choppy = mix(choppy, 1.0, 0.2);" +  // 0.2に近づくように小さくしている
+"    choppy = mix(choppy, 1.0, 0.2);" +
 "  }" +
 "  return p.y - h;" +
 "}" +
@@ -162,7 +161,7 @@ let fs =
 "    uv = (octave_m / 1.2) * uv;" + // やや小さく
 "    freq *= 1.9;" +  // 振動数を大きく
 "    amp *= 0.22;" +  // 振幅を小さく
-"    choppy = mix(choppy, 1.0, 0.2);" +  // 0.2に近づくように小さくしている
+"    choppy = mix(choppy, 1.0, 0.2);" +
 "  }" +
 "  return p.y - h;" +
 "}" +
