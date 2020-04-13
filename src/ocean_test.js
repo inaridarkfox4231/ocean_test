@@ -49,26 +49,26 @@ let fs =
 // 1箇所でしか使ってないからわかりやすいように成分表記にした。
 // rollで横揺れしたあとpitchで上下動、最後にyawでぐるぐる水平回転
 "mat3 fromEuler(float roll, float pitch, float yaw){" +
-"	 vec2 a = vec2(cos(roll), sin(roll));" +
+"    vec2 a = vec2(cos(roll), sin(roll));" +
 "  vec2 b = vec2(cos(pitch), sin(pitch));" +
 "  vec2 c = vec2(cos(yaw), sin(yaw));" +
 // 画面の横揺れ（roll）
 "  mat3 m_roll;" +
 "  m_roll[0] = vec3(a.x, a.y, 0.0);" +
-"	 m_roll[1] = vec3(-a.y, a.x, 0.0);" +
-"	 m_roll[2] = vec3(0.0, 0.0, 1.0);" +
+"    m_roll[1] = vec3(-a.y, a.x, 0.0);" +
+"    m_roll[2] = vec3(0.0, 0.0, 1.0);" +
 // 縦揺れ（pitch）
 "  mat3 m_pitch;" +
 "  m_pitch[0] = vec3(1.0, 0.0, 0.0);" +
-"	 m_pitch[1] = vec3(0.0, b.x, b.y);" +
-"	 m_pitch[2] = vec3(0.0, -b.y, b.x);" +
+"    m_pitch[1] = vec3(0.0, b.x, b.y);" +
+"    m_pitch[2] = vec3(0.0, -b.y, b.x);" +
 // 水平回転（yaw）
 "  mat3 m_yaw;" +
 "  m_yaw[0] = vec3(c.x, 0.0, c.y);" +
-"	 m_yaw[1] = vec3(0.0, 1.0, 0.0);" +
-"	 m_yaw[2] = vec3(-c.y, 0.0, c.x);" +
+"    m_yaw[1] = vec3(0.0, 1.0, 0.0);" +
+"    m_yaw[2] = vec3(-c.y, 0.0, c.x);" +
 // m_roll, m_pitch, m_yawの順に適用される
-"	 return m_yaw * m_pitch * m_roll;" +
+"    return m_yaw * m_pitch * m_roll;" +
 "}" +
 // バリューノイズの準備、ハッシュ関数
 "float hash(vec2 p){" +
