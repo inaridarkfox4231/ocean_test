@@ -1,9 +1,17 @@
-// イメージとしてはx軸が水平右方向、y軸がそれに垂直に上方向、z軸が手前に向かう方向って感じ。
-// rollはxy平面内で反時計回りに回転、pitchはそのあとでyz平面内でyをzに移すように回転、yawは最後に円錐の周を描くように
+// イメージとしてはx軸が水平右方向、y軸がそれに垂直に上方向
+// z軸が手前に向かう方向って感じ。
+// rollはxy平面内で反時計回りに回転、pitchはそのあとでyz平面内でyをzに移すように回転、
+// yawは最後に円錐の周を描くように
 // xz平面内でその頂点がxをzに移すように回転する感じね。
 // カメラはz軸正方向にぎゅーん。だから遠ざかっていくイメージなんかな・・
-// 色が描画されるのはz軸負の方向に1.6だけ離れたところにある、640x360を上下幅を-1.0～1.0とした感じのスクリーン。
-// これが回転行列でぐるぐるされて、されたうえで、目線がとんで、空の色や海の色が貼り付けられるようですね。
+// 色が描画されるのはz軸負の方向に1.6だけ離れたところにある、
+// 640x360を上下幅を-1.0～1.0とした感じのスクリーン。
+// これが回転行列でぐるぐるされて、されたうえで、目線がとんで、
+// 空の色や海の色が貼り付けられるようですね。
+
+// 参考：TDMさんのオリジナル：https://www.shadertoy.com/view/Ms2SD1
+// CaliCoastさんのアレンジ版：https://www.shadertoy.com/view/lt3GWj
+// 基本的にアレンジ版を参考にしつつ若干装飾を省いてある感じ
 
 let myShader;
 
@@ -35,13 +43,6 @@ let fs =
 "const vec3 SEA_WATER_COLOR = vec3(0.55, 0.9, 0.7);" + // 海水のベースカラー
 // 海面の高さを計算するための繰り返しに使う行列
 "mat2 octave_m = mat2(1.7, -1.2, 1.2, 1.4);" +
-// hsbで書かれた(0.0～1.0)の数値vec3をrgbに変換する魔法のコード
-"vec3 getHSB(float r, float g, float b){" +
-"  vec3 c = vec3(r, g, b);" +
-"  vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);" +
-"  rgb = rgb * rgb * (3.0 - 2.0 * rgb);" +
-"  return c.z * mix(vec3(1.0), rgb, c.y);" +
-"}" +
 // fromEulerの独自修正版。(roll, pitch, yaw)で取得する。ベクトルの変換行列。
 // 1箇所でしか使ってないからわかりやすいように成分表記にした。
 // rollで横揺れしたあとpitchで上下動、最後にyawでぐるぐる水平回転
@@ -91,14 +92,16 @@ let fs =
 "  return pow(dot(n, l) * 0.4 + 0.6, p);" +
 "}" +
 // 鏡面反射？？
-// nとlは上と同じ、eはeye（目の位置から該当位置への単位ベクトル）、sには90.0が入ってるっぽい。
+// nとlは上と同じ、eはeye（目の位置から該当位置への単位ベクトル）、
+// sには90.0が入ってるっぽい。
 "float specular(vec3 n, vec3 l, vec3 eye, float s){" +
 "  float nrm = (s + 8.0) / (pi + 8.0);" +
 "  return pow(max(dot(reflect(eye, n), l), 0.0), s) * nrm;" +
 "}" +
-// 上の二つってpowがpowなら80乗とか90乗になっちゃうんだけどおかしいなぁ。。ほんとに？？
+// 上の二つってpowがpowなら80乗とか90乗になっちゃうんだけど・・分かんない。
 // 空の色
-// eyeは目線のベクトル。y座標しか使わない。上の方だと空、下の方は考えない感じ（0.0になっちゃう、適用されることを想定してない）
+// eyeは目線のベクトル。y座標しか使わない。上の方だと空、下の方は考えない感じ。
+//（0.0になっちゃう、適用されることを想定してない）
 // ちなみに真っ白になる。上の方ほど濃い青になっている。
 "vec3 getSkyColor(vec3 e){" +
 "  e.y = max(e.y, 0.0);" +
@@ -153,7 +156,8 @@ let fs =
 "  uv.x *= 0.75;" +
 "  float d, h = 0.0;" +
 "  for(int i = 0; i < ITER_DETAILED; i++){" +
-"    d = sea_octave((uv + seatime) * freq, choppy) + sea_octave((uv - seatime) * freq, choppy);" + // 波にバリエーションを持たせる
+"    d = sea_octave((uv + seatime) * freq, choppy);" +
+"    d += sea_octave((uv - seatime) * freq, choppy);" + // 波にバリエーションを持たせる？
 "    h += d * amp;" +
 "    uv = (octave_m / 1.2) * uv;" + // やや小さく
 "    freq *= 1.9;" +  // 振動数を大きく
@@ -171,7 +175,8 @@ let fs =
 "  fresnel = pow(fresnel, 3.0) * 0.45;" +
 // 反射光。色は空の色。
 "  vec3 reflected = getSkyColor(reflect(eye, n)) * 0.99;" +
-// 屈折光。海本来の色は光がまっすぐ差し込んでいるほど大きく反映される（横に近い角度から見るとほぼ反射光ってなるでしょそういうの）
+// 屈折光。海本来の色は光がまっすぐ差し込んでいるほど大きく反映される
+//（横に近い角度から見るとほぼ反射光ってなるからそういうのだと思う）
 "  vec3 refracted = SEA_BASE + diffuse(n, l, 80.0) * SEA_WATER_COLOR * 0.27;" +
 // fresnelの割合で混ぜる
 "  vec3 color = mix(refracted, reflected, fresnel);" +
@@ -195,7 +200,8 @@ let fs =
 // 海面上の地点をあらわすベクトルpを返すように修正しちゃう。
 "vec3 heightMapTracing(vec3 ori, vec3 dir){" +
 "  vec3 p;" + // vec3(0.0)で初期化される
-// tmとtxはoriからdirに従ってどれだけ伸ばしたら海面に達するかという、その小さい方と大きい方の初期値
+// tmとtxはoriからdirに従ってどれだけ伸ばしたら海面に達するかという、
+// その小さい方と大きい方の初期値
 // で、徐々に範囲を狭めていくわけ。
 "  float tm = 0.0;" +
 "  float tx = 500.0;" +
@@ -207,7 +213,7 @@ let fs =
 "  float hm = map_rough(ori + dir * tm);" +
 "  float tmid = 0.0;" +
 "  for(int i = 0; i < NUM_STEPS; i++){" +
-// 難しいことやってない。下限のtmと上限のtxの間にあるhmと-hxの比に対応するポイントを探し当ててるだけ。
+// 難しくない。下限のtmと上限のtxの間にあるhmと-hxの比に対応するポイントを探し当ててるだけ。
 "    tmid = mix(tm, tx, hm / (hm + (-hx)));" +
 "    p = ori + dir * tmid;" +
 "    float hmid = map_rough(p);" + // 当たりをつけたうえで改めて海面との変位を取る。
@@ -228,8 +234,9 @@ let fs =
 // roll（横揺れ）、pitch（縦揺れ）、yaw（視線方向）を作る
 "  float phase = time * pi * 0.5;" +
 "  float roll = (sin(phase) + cos(phase * 0.5)) / 14.0;" +
-"  float pitch = pi * 0.02 + (sin(phase * 0.5) + cos(phase)) / 40.0 + (u_mouse.y / u_resolution.y - 0.8) * pi / 3.0;" +
-"  float yaw = u_mouse.x / u_resolution.x * pi * 4.0;" +
+"  float pitch = pi * 0.02 + (sin(phase * 0.5) + cos(phase)) / 40.0;" +
+"  pitch += (u_mouse.y / u_resolution.y - 0.8) * pi / 3.0;" + // マウスのy座標による縦揺れ
+"  float yaw = u_mouse.x / u_resolution.x * pi * 4.0;" + // マウスのx座標による視点の回転
 // oriはカメラ位置、dirはピクセルに向かうベクトルの正規化（デフォは目の前1.6の所に-1.0～1.0）
 "  vec3 ori = vec3(0.0, 3.5, time * 3.0);" +
 "  vec3 dir = normalize(vec3(st.xy, -1.6));" +
@@ -240,8 +247,8 @@ let fs =
 // oriからdir方向にレイをぎゅんっと飛ばした先の海面上の地点のベクトルを取得する（グローバルの）
 "  vec3 p = heightMapTracing(ori, dir);" +
 "  vec3 dist = p - ori;" +
-// 法線ベクトルをpにおいて取るんだけど、その際の微小数が海面からの距離に左右されるように調節してるみたい。
-// 海面が遠い時は解像度を意図的に下げている。
+// 法線ベクトルをpにおいて取るんだけど、その際の微小数が海面からの距離に左右されるように
+// 調節してるみたい。海面が遠い時は解像度を意図的に下げている。
 "  vec3 n = getNormal(p, dot(dist, dist) * 0.5 / u_resolution.x);" +
 // 平行光の逆ベクトル。yz平面にに平行で前方下方くらい。
 "  vec3 light = normalize(vec3(0.0, 1.0, 0.8));" +
@@ -261,7 +268,9 @@ function setup(){
 
 function draw(){
   myShader.setUniform("u_resolution", [width, height]);
-  myShader.setUniform("u_mouse", [constrain(mouseX, 0, width), constrain(mouseY, 0, height)]);
+  let mx = constrain(mouseX, 0, width);
+  let my = constrain(mouseY, 0, height);
+  myShader.setUniform("u_mouse", [mx, my]);
   myShader.setUniform("u_time", millis() / 1000);
   quad(-1, -1, -1, 1, 1, 1, 1, -1);
 }
