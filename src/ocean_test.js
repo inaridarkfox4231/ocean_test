@@ -268,7 +268,8 @@ function setup(){
 function draw(){
   myShader.setUniform("u_resolution", [width, height]);
   let mx = constrain(mouseX, 0, width);
-  let my = constrain(mouseY, 0, height);
+  // マウスのyはGLSLでは逆なので放り込むときは注意！
+  let my = height - constrain(mouseY, 0, height);
   myShader.setUniform("u_mouse", [mx, my]);
   myShader.setUniform("u_time", millis() / 1000);
   quad(-1, -1, -1, 1, 1, 1, 1, -1);
