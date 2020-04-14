@@ -29,7 +29,7 @@ let fs =
 "uniform float u_time;" +
 // 円周率
 "const float pi = 3.14159;" +
-// レイマーチングの回数
+// レイトレーシングの回数
 "const int NUM_STEPS = 6;" +
 // 海面の高さを計算する際の繰り返し回数（ラフ、ディテール）・・名前変えちゃおうか。
 "const int ITER_ROUGH = 2;" +
@@ -123,7 +123,7 @@ let fs =
 "  return pow(1.0 - pow(wv.x * wv.y, 0.65), choppy);" +
 "}" +
 // 次にmap（粗い方）を作る感じ。ラフなので繰り返しは2回だけ。
-// ラフの方はレイマーチングで海面との交点を出すのに使われる感じですね。
+// ラフの方はレイトレーシングで海面との交点を出すのに使われる感じですね。
 "float map_rough(vec3 p){" +
 "  float freq = SEA_FREQ;" +  // 振動数、基本波を作るときに適用する。
 "  float amp = SEA_HEIGHT;" +  // 振幅（波の高さ的な？）
